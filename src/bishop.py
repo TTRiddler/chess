@@ -1,4 +1,4 @@
-from chess.src.piece import Piece
+from .piece import Piece
 
 
 class Bishop(Piece):

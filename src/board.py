@@ -1,9 +1,9 @@
-from chess.src.king import King
-from chess.src.queen import Queen
-from chess.src.rook import Rook
-from chess.src.knight import Knight
-from chess.src.bishop import Bishop
-from chess.src.pawn import Pawn
+from .king import King
+from .queen import Queen
+from .rook import Rook
+from .knight import Knight
+from .bishop import Bishop
+from .pawn import Pawn
 
 
 BLACK = 0

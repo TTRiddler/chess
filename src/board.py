@@ -1,9 +1,14 @@
-from .king import King
-from .queen import Queen
-from .rook import Rook
-from .knight import Knight
-from .bishop import Bishop
-from .pawn import Pawn
+# -*- coding: utf-8 -*-
+import traceback
+import re
+from piece import Piece
+from king import King
+from queen import Queen
+from rook import Rook
+from knight import Knight
+from bishop import Bishop
+from pawn import Pawn
+from empty import Empty
 
 
 BLACK = 0
@@ -12,84 +17,119 @@ WHITE = 1
 
 class Board(object):
     def __init__(self):
-        self.pieces = []
+        self.__key_regexp = re.compile('^[A-H][1-8]$')
+        self.__letter_mapping = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'H': 7}
+        self.__int_mapping = {0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'F', 6: 'G', 7: 'H'}
+        self.board = [[None] * 8 for _ in range(8)]
+        self.deleted_pieces = []
+        self.__empty_board()
 
     def __str__(self):
-        """
-        Показ шахматной доски
-        :return: str
-        """
         string_rep = ''
-        for y in range(8):
-            for x in range(8):
-                piece = None
-                for p in self.pieces:
-                    if p.position == (x, y):
-                        piece = p
-                        break
-                piece_rep = '\033[97m ⭗ '
-                if piece:
-                    side = piece.side
-                    color = '\033[31m {0} ' if side == WHITE else '\033[30m {0} '
-                    piece_rep = color.format(piece)
-                string_rep += piece_rep
-            string_rep += '\n'
+        for i, item in enumerate(self):
+            if i % 8 == 0:
+                string_rep += '\n'
+            if isinstance(item, Empty):
+                string_rep += '\33[97m🙿 '
+            else:
+                if item.side == WHITE:
+                    string_rep += '\33[93m' + item.IMG[item.side] + ' '
+                else:
+                    string_rep += '\33[94m' + item.IMG[item.side] + ' '
         return string_rep
 
-    # def move(self, xy_from, xy_to, color=None):
-    #     """
-    #     Перемещение фигуры по доске
-    #     :param xy_from: tuple(x,y)
-    #     :param xy_to: tuple(x,y)
-    #     :param color: bool
-    #     :return: None
-    #     """
-    #     x_from, y_from = xy_from
-    #     x_to, y_to = xy_to
-    #     self.board[x_from][y_from], self.board[x_to][y_to] = self.board[x_to][y_to], self.board[x_from][y_from]
-
     def clear(self):
-        """
-        Очистка шахматной доски
-        :return: None
-        """
-        self.pieces = []
+        self.__empty_board()
 
     def new(self):
-        """
-        Новая шахматная доска
-        :return: None
-        """
-        for i in range(8):
-            self.pieces.extend([
-                Pawn(BLACK, (i, 6)),
-                Pawn(WHITE, (i, 1))
-            ])
+        for key in self.__letter_mapping:
+            self[key+'7'] = Pawn(BLACK, self)
+            self[key+'2'] = Pawn(WHITE, self)
 
-        self.pieces.extend([
-            Rook(BLACK, (0, 7)),
-            Knight(BLACK, (1, 7)),
-            Bishop(BLACK, (2, 7)),
-            Queen(BLACK, (3, 7)),
-            King(BLACK, (4, 7)),
-            Bishop(BLACK, (5, 7)),
-            Knight(BLACK, (6, 7)),
-            Rook(BLACK, (7, 7)),
+        self['A1'] = Rook(WHITE, self)
+        self['H1'] = Rook(WHITE, self)
+        self['A8'] = Rook(BLACK, self)
+        self['H8'] = Rook(BLACK, self)
 
-            Rook(WHITE, (0, 0)),
-            Knight(WHITE, (1, 0)),
-            Bishop(WHITE, (2, 0)),
-            Queen(WHITE, (3, 0)),
-            King(WHITE, (4, 0)),
-            Bishop(WHITE, (5, 0)),
-            Knight(WHITE, (6, 0)),
-            Rook(WHITE, (7, 0))
-        ])
+        self['B1'] = Knight(WHITE, self)
+        self['G1'] = Knight(WHITE, self)
+        self['B8'] = Knight(BLACK, self)
+        self['G8'] = Knight(BLACK, self)
+
+        self['C1'] = Bishop(WHITE, self)
+        self['F1'] = Bishop(WHITE, self)
+        self['C8'] = Bishop(BLACK, self)
+        self['F8'] = Bishop(BLACK, self)
+
+        self['D1'] = Queen(WHITE, self)
+        self['D8'] = Queen(BLACK, self)
+
+        self['E1'] = King(WHITE, self)
+        self['E8'] = King(BLACK, self)
+
+        # for testing
+        # self['A3'] = King(BLACK, self)
+        # self['H5'] = Pawn(WHITE, self)
+        # self['H3'] = Rook(WHITE, self)
+
+    def move(self, pos_from, pos_to):
+        piece_from = self[pos_from]
+        piece_to = self[pos_to]
+
+        piece_from.make_move(piece_to)
+
+        # for console
+        msg = '\33[91m{0} --> {1}'.format(piece_from, piece_to)
+        print(msg)
+
+    def __setitem__(self, key, value):
+        key = key.upper()
+
+        if not isinstance(value, Piece):
+            raise ValueError('Value must be None or Piece')
+
+        if self.__key_regexp.search(key):
+            x, y = key
+            value.position = key
+            self.board[int(y)-1][self.__letter_mapping[x]] = value
+        else:
+            raise KeyError('The key should be like: A1')
+
+    def __getitem__(self, key):
+        key = key.upper()
+
+        if self.__key_regexp.search(key):
+            x, y = key
+            return self.board[int(y)-1][self.__letter_mapping[x]]
+        else:
+            raise KeyError('The key should be like: A1')
+
+    def __iter__(self):
+        for row in self.board:
+            for item in row:
+                yield item
+
+    def get_coords(self, position):
+        return self.__letter_mapping[position[0].upper()], int(position[1]) - 1
+
+    def get_pos(self, coords):
+        return self.__int_mapping[coords[0]] + str(coords[1] + 1)
+
+    def __empty_board(self):
+        for col in self.__letter_mapping:
+            for row in range(1, 9):
+                self[col+str(row)] = Empty(None, self)
 
 
 if __name__ == '__main__':
     b = Board()
-    b.new()
-    # b.move((0, 1), (3, 3))
-    print(b)
     # print(b)
+    b.new()
+    while True:
+        print(b)
+        row = input('\33[91mYour turn: ')
+        try:
+            b.move(*row.split())
+        except Exception as e:
+            print(e)
+            # print(traceback.print_exc())

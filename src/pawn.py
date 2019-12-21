@@ -6,12 +6,9 @@ from empty import Empty
 class Pawn(Piece):
     IMG = ('♟', '♙')
 
-    def __init__(self, side, board):
-        super(Pawn, self).__init__(side, board)
-        self.first_move = True
-
     def make_move(self, piece_to):
         if self.can_move(piece_to):
+            self.board.history.append('{0}({1}) --> {2}({3})'.format(self, self.position, piece_to, piece_to.position))
             self.board[self.position], self.board[piece_to.position] = Empty(None, self.board), self.board[self.position]
             if self.first_move:
                 self.first_move = False
@@ -25,7 +22,6 @@ class Pawn(Piece):
 
         if isinstance(piece_to, Empty):
             k = (pos_from[1] - pos_to[1]) * ((-1) ** self.side)
-
             if pos_from[0] == pos_to[0]:
                 if k == 1:
                     return True
@@ -37,7 +33,6 @@ class Pawn(Piece):
         else:
             if self.side != piece_to.side:
                 k = (-1) ** (self.side + 1)
-
                 if pos_to[1] == pos_from[1] + k and pos_to[0] in (pos_from[0] - 1, pos_from[0] + 1):
                     return True
             return False

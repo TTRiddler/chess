@@ -8,7 +8,10 @@ class Knight(Piece):
 
     def make_move(self, piece_to):
         if self.can_move(piece_to):
+            self.board.history.append('{0}({1}) --> {2}({3})'.format(self, self.position, piece_to, piece_to.position))
             self.board[self.position], self.board[piece_to.position] = Empty(None, self.board), self.board[self.position]
+            if self.first_move:
+                self.first_move = False
             if not isinstance(piece_to, Empty):
                 self.board.deleted_pieces.append(piece_to)
         else:

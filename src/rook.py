@@ -6,12 +6,9 @@ from empty import Empty
 class Rook(Piece):
     IMG = ('♜', '♖')
 
-    def __init__(self, side, board):
-        super(Rook, self).__init__(side, board)
-        self.first_move = True
-
     def make_move(self, piece_to):
         if self.can_move(piece_to):
+            self.board.history.append('{0}({1}) --> {2}({3})'.format(self, self.position, piece_to, piece_to.position))
             self.board[self.position], self.board[piece_to.position] = Empty(None, self.board), self.board[self.position]
             if self.first_move:
                 self.first_move = False

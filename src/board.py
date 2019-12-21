@@ -23,12 +23,15 @@ class Board(object):
         self.board = [[None] * 8 for _ in range(8)]
         self.deleted_pieces = []
         self.__empty_board()
+        self.history = []
 
     def __str__(self):
-        string_rep = ''
+        string_rep = '\33[90m   A  B  C  D  E  F G  H'
+        k = 0
         for i, item in enumerate(self):
             if i % 8 == 0:
-                string_rep += '\n'
+                k += 1
+                string_rep += '\n ' + '\33[90m' + str(k) + ' '
             if isinstance(item, Empty):
                 string_rep += '\33[97m🙿 '
             else:
@@ -67,20 +70,11 @@ class Board(object):
         self['E1'] = King(WHITE, self)
         self['E8'] = King(BLACK, self)
 
-        # for testing
-        # self['A3'] = King(BLACK, self)
-        # self['H5'] = Pawn(WHITE, self)
-        # self['H3'] = Rook(WHITE, self)
-
     def move(self, pos_from, pos_to):
         piece_from = self[pos_from]
         piece_to = self[pos_to]
 
         piece_from.make_move(piece_to)
-
-        # for console
-        msg = '\33[91m{0} --> {1}'.format(piece_from, piece_to)
-        print(msg)
 
     def __setitem__(self, key, value):
         key = key.upper()
@@ -127,9 +121,11 @@ if __name__ == '__main__':
     b.new()
     while True:
         print(b)
-        row = input('\33[91mYour turn: ')
+        turn = input('\33[91mYour turn: ')
         try:
-            b.move(*row.split())
+            b.move(*turn.split())
+            for i in b.history:
+                print('\33[91m' + i)
         except Exception as e:
             print(e)
             # print(traceback.print_exc())

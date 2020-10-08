@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import traceback
 import re
 from piece import Piece
@@ -26,25 +25,20 @@ class Board(object):
         self.history = []
 
     def __str__(self):
-        string_rep = '\33[90m   A  B  C  D  E  F G  H'
-        k = 0
-        for i, item in enumerate(self):
-            if i % 8 == 0:
-                k += 1
-                string_rep += '\n ' + '\33[90m' + str(k) + ' '
-            if isinstance(item, Empty):
-                string_rep += '\33[97m🙿 '
-            else:
-                if item.side == WHITE:
-                    string_rep += '\33[93m' + item.IMG[item.side] + ' '
-                else:
-                    string_rep += '\33[94m' + item.IMG[item.side] + ' '
+        sep = '  '
+        letter_header = '\33[90m ' + sep + sep.join(self.__letter_mapping) + sep
+        string_rep = letter_header + '\n'
+
+        for i, row in enumerate(self.board, start=1):
+            string_rep += '\33[90m' + str(i) + sep + sep.join(str(item) if item else '\33[97m-' for item in row) + '\33[90m' + sep + str(i) + '\n'
+
+        string_rep += letter_header
         return string_rep
 
     def clear(self):
         self.__empty_board()
 
-    def new(self):
+    def fill_board(self):
         for key in self.__letter_mapping:
             self[key+'7'] = Pawn(BLACK, self)
             self[key+'2'] = Pawn(WHITE, self)
@@ -79,15 +73,16 @@ class Board(object):
     def __setitem__(self, key, value):
         key = key.upper()
 
-        if not isinstance(value, Piece):
+        if not isinstance(value, Piece) and value is not None:
             raise ValueError('Value must be None or Piece')
 
-        if self.__key_regexp.search(key):
-            x, y = key
-            value.position = key
-            self.board[int(y)-1][self.__letter_mapping[x]] = value
-        else:
+        if not self.__key_regexp.search(key):
             raise KeyError('The key should be like: A1')
+
+        x, y = key
+        if value is not None:
+            value.position = key
+        self.board[int(y)-1][self.__letter_mapping[x]] = value         
 
     def __getitem__(self, key):
         key = key.upper()
@@ -112,20 +107,21 @@ class Board(object):
     def __empty_board(self):
         for col in self.__letter_mapping:
             for row in range(1, 9):
-                self[col+str(row)] = Empty(None, self)
+                self[col+str(row)] = None
 
 
 if __name__ == '__main__':
     b = Board()
     # print(b)
-    b.new()
-    while True:
-        print(b)
-        turn = input('\33[91mYour turn: ')
-        try:
-            b.move(*turn.split())
-            for i in b.history:
-                print('\33[91m' + i)
-        except Exception as e:
-            print(e)
+    b.fill_board()
+    print(b)
+    # while True:
+    #     print(b)
+    #     turn = input('\33[91mYour turn: ')
+    #     try:
+    #         b.move(*turn.split())
+    #         for i in b.history:
+    #             print('\33[91m' + i)
+    #     except Exception as e:
+    #         print(e)
             # print(traceback.print_exc())

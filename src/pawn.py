@@ -1,10 +1,15 @@
-# -*- coding: utf-8 -*-
-from piece import Piece
+from piece import Piece, COLORS, BLACK, WHITE
 from empty import Empty
 
 
+CONSOLE_IMAGE = {
+    BLACK: '\33[94m♟',
+    WHITE: '\33[93m♙'
+}
+
+
 class Pawn(Piece):
-    IMG = ('♟', '♙')
+    """ Pawn """
 
     def make_move(self, piece_to):
         if self.can_move(piece_to):
@@ -36,3 +41,9 @@ class Pawn(Piece):
                 if pos_to[1] == pos_from[1] + k and pos_to[0] in (pos_from[0] - 1, pos_from[0] + 1):
                     return True
             return False
+
+    def __str__(self):
+        return CONSOLE_IMAGE[self.side]
+
+    def __repr__(self):
+        return f'<Pawn ({COLORS[self.side]})>'

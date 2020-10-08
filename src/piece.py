@@ -1,18 +1,29 @@
-# -*- coding: utf-8 -*-
-color = {0: 'BLACK', 1: 'WHITE', None: 'None'}
+from abc import ABC, abstractmethod
 
 
-class Piece(object):
-    IMG = None
+BLACK = 0
+WHITE = 1
+
+
+COLORS = {
+    BLACK: 'BLACK',
+    WHITE: 'WHITE'
+}
+
+
+class Piece(ABC):
+    """ Chess Piece """
 
     def __init__(self, side, board):
         self.side = side
         self.board = board
         self.position = None
-        self.first_move = True
+        self.made_first_move = False
 
-    def __str__(self):
-        return self.IMG[self.side]
+    @abstractmethod
+    def make_move(self):
+        pass
 
-    def __repr__(self):
-        return '{0}({1})'.format(self.__class__.__name__, color[self.side])
+    @abstractmethod
+    def can_move(self):
+        pass

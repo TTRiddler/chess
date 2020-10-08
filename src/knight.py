@@ -1,10 +1,15 @@
-# -*- coding: utf-8 -*-
-from piece import Piece
+from piece import Piece, COLORS, BLACK, WHITE
 from empty import Empty
 
 
+CONSOLE_IMAGE = {
+    BLACK: '\33[94m♞',
+    WHITE: '\33[93m♘'
+}
+
+
 class Knight(Piece):
-    IMG = ('♞', '♘')
+    """ Knight """
 
     def make_move(self, piece_to):
         if self.can_move(piece_to):
@@ -25,3 +30,9 @@ class Knight(Piece):
                     pos_to[0] in (pos_from[0] - 2, pos_from[0] + 2) and pos_to[1] in (pos_from[1] + 1, pos_from[1] - 1)):
                 return True
         return False
+
+    def __str__(self):
+        return CONSOLE_IMAGE[self.side]
+
+    def __repr__(self):
+        return f'<Knight ({COLORS[self.side]})>'

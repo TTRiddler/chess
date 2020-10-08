@@ -1,10 +1,15 @@
-# -*- coding: utf-8 -*-
-from piece import Piece
+from piece import Piece, COLORS, BLACK, WHITE
 from empty import Empty
 
 
+CONSOLE_IMAGE = {
+    BLACK: '\33[94m♜',
+    WHITE: '\33[93m♖'
+}
+
+
 class Rook(Piece):
-    IMG = ('♜', '♖')
+    """ Rook """
 
     def make_move(self, piece_to):
         if self.can_move(piece_to):
@@ -34,3 +39,9 @@ class Rook(Piece):
                         return False
                 return True
         return False
+
+    def __str__(self):
+        return CONSOLE_IMAGE[self.side]
+
+    def __repr__(self):
+        return f'<Rook ({COLORS[self.side]})>'
